@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import tweepy
 from kafka import KafkaProducer
-import string
 import json
 import config
 
-producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+producer = KafkaProducer(bootstrap_servers='kafkadocker_kafka_1:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 ######################################################################
 # Create a handler for the streaming data that stays open...
@@ -17,6 +16,13 @@ class StdOutListener(tweepy.StreamListener):
     ''' Handles data received from the stream. '''
 
     ######################################################################
+    # Include a counter in the class
+    ######################################################################
+    def __init__(self, api=None):
+        super(StdOutListener, self).__init__()
+        self.num_tweets = 0
+
+    ######################################################################
     # For each status event
     ######################################################################
 
@@ -24,8 +30,8 @@ class StdOutListener(tweepy.StreamListener):
         ##################################################################
         # Structure of the tweepy status object
         # {
-        #  'contributors': None, 
-        #  'truncated': False, 
+        #  'contributors': None,
+        #  'truncated': False,
         #  'text': 'My Top Followers in 2010: @tkang1 @serin23 @uhrunland @aliassculptor @kor0307 @yunki62. Find yours @ http://mytopfollowersin2010.com',
         #  'in_reply_to_status_id': None,
         #  'id': 21041793667694593,
@@ -40,18 +46,18 @@ class StdOutListener(tweepy.StreamListener):
         #  'in_reply_to_user_id': None,
         #  'favorited': False,
         #  'retweeted_status': <tweepy.models.status object="" at="" 0xb2b5190="">,
-        #  'source_url': 'http://mytopfollowersin2010.com', 
+        #  'source_url': 'http://mytopfollowersin2010.com',
         #  'user': <tweepy.models.user object="" at="" 0x6c16610="">,
-        #  'geo': None, 
-        #  'in_reply_to_user_id_str': None, 
-        #  'created_at': datetime.datetime(2011, 1, 1, 3, 15, 29), 
-        #  'in_reply_to_status_id_str': None, 
+        #  'geo': None,
+        #  'in_reply_to_user_id_str': None,
+        #  'created_at': datetime.datetime(2011, 1, 1, 3, 15, 29),
+        #  'in_reply_to_status_id_str': None,
         #  'place': None
         # }
         # </tweepy.models.user></tweepy.models.status></tweepy.models.user></tweepy.api.api>
         ##################################################################
 
-        if status.lang not in ['en','no']:
+        if status.lang not in ['en', 'no']:
             return True
         message = {}
         message['language'] = status.lang
@@ -59,11 +65,10 @@ class StdOutListener(tweepy.StreamListener):
         message['followers_count'] = status.user.followers_count
         message['friends_count'] = status.user.friends_count
         message['text'] = status.text
-        message['created_at'] = status.created_at.isoformat() 
+        message['created_at'] = status.created_at.isoformat()
         message['coordinates'] = None
         if status.coordinates:
             message['coordinates'] = status.coordinates.coordinates
-        
 
         # Prints the text of the tweet
         # print ('%d,%d,%d,%s,%s' % (status.user.followers_count, status.user.friends_count,status.user.statuses_count, status.user.id_str, status.user.screen_name))
@@ -71,6 +76,9 @@ class StdOutListener(tweepy.StreamListener):
 
         # publishes the message to the kafka topic
         producer.send(config.KAFKA_TOPIC, message)
+        self.num_tweets += 1
+        if self.num_tweets % 10 == 0:
+            print('Published {} tweets'.format(self.num_tweets))
 
         return True
 
@@ -118,10 +126,7 @@ if __name__ == '__main__':
 
     ######################################################################
     # Custom Filter rules pull all traffic for those filters in real time.
-    # Below are some examples add or remove as needed...
     ######################################################################
-    # A Good demo stream of reasonable amount
+    # Filter stream by tweets containing the WORDS_TO_TRACK
+    print('Filtering tweets by: {}'.format(', '.join(config.WORDS_TO_TRACK)))
     stream.filter(track=config.WORDS_TO_TRACK)
-    # Hadoop Summit following
-    # stream.filter(track=['actian', 'hadoop', 'hadoopsummit'])
-    #stream.filter(track=['norway', 'sonat'])

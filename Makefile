@@ -7,10 +7,10 @@ build:
 	docker build -t="sonat/twitter-kafka" .
 
 run: build
-	docker run -t -i -d  -v $(CURDIR)/app:/opt/app --net=host --name twitter-kafka sonat/twitter-kafka
+	docker run -t -i  -v $(CURDIR)/app:/opt/app --network=kafkadocker_default --name twitter-kafka sonat/twitter-kafka
 
 stop:
 	docker stop twitter-kafka
 
 start:
-	docker start twitter-kafka
+	docker start -a twitter-kafka
