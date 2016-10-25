@@ -1,4 +1,4 @@
 #Requirements
 
 kafka
-git+git://github.com/fsroque/tweepy#egg=tweepy
+twython
