@@ -4,7 +4,7 @@ from kafka import KafkaProducer
 import json
 import config
 
-producer = KafkaProducer(bootstrap_servers='kafkadocker_kafka_1:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+producer = KafkaProducer(bootstrap_servers='kafka:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 ######################################################################
 # Create a handler for the streaming data that stays open...
@@ -62,7 +62,7 @@ class MyStreamer(TwythonStreamer):
     def on_error(self, status_code, data):
         if status_code == 420:
             # returning False in on_data disconnects the stream
-            return False
+            self.disconnect()
         print('Got an error with status code: ' + str(status_code))
         return True  # To continue listening
 
