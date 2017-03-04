@@ -34,20 +34,9 @@ class MyStreamer(TwythonStreamer):
 
         if data.get('lang', None) not in ['en', 'no']:
             return True
-        message = {}
-        message['language'] = data['lang']
-        message['author'] = data['user']['screen_name']
-        message['followers_count'] = data['user']['followers_count']
-        message['friends_count'] = data['user']['friends_count']
-        message['author_location'] = data['user']['location']
-        message['text'] = data['text']
-        message['created_at'] = data['created_at']
-        message['coordinates'] = None
-        if data['coordinates']:
-            message['coordinates'] = data['coordinates']['coordinates']
 
-        # publishes the message to the kafka topic
-        producer.send(config.KAFKA_TOPIC, message)
+        # publishes the tweet to the kafka topic
+        producer.send(config.KAFKA_TOPIC, data)
         self.num_tweets += 1
         if self.num_tweets % 10 == 0:
             print('Published {} tweets'.format(self.num_tweets))
