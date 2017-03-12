@@ -68,7 +68,7 @@ if __name__ == '__main__':
     CONSUMER_SECRET = os.environ.get("CONSUMER_SECRET", config.CONSUMER_SECRET)
     ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN", config.ACCESS_TOKEN)
     ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET", config.ACCESS_TOKEN_SECRET)
-    WORDS_TO_TRACK = os.environ.get("WORDS_TO_TRACK", config.WORDS_TO_TRACK)
+    WORDS_TO_TRACK = os.environ.get("WORDS_TO_TRACK", config.WORDS_TO_TRACK).split(',')
 
     stream = MyStreamer(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
