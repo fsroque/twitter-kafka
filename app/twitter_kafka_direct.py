@@ -2,6 +2,7 @@
 from twython import TwythonStreamer
 from kafka import KafkaProducer
 import json
+import os
 import config
 
 producer = KafkaProducer(bootstrap_servers='kafka:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
@@ -63,11 +64,17 @@ class MyStreamer(TwythonStreamer):
 
 if __name__ == '__main__':
 
-    stream = MyStreamer(config.CONSUMER_KEY, config.CONSUMER_SECRET, config.ACCESS_TOKEN, config.ACCESS_TOKEN_SECRET)
+    CONSUMER_KEY = os.environ.get("CONSUMER_KEY", config.CONSUMER_KEY)
+    CONSUMER_SECRET = os.environ.get("CONSUMER_SECRET", config.CONSUMER_SECRET)
+    ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN", config.ACCESS_TOKEN)
+    ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET", config.ACCESS_TOKEN_SECRET)
+    WORDS_TO_TRACK = os.environ.get("WORDS_TO_TRACK", config.WORDS_TO_TRACK)
+
+    stream = MyStreamer(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
     ######################################################################
     # Custom Filter rules pull all traffic for those filters in real time.
     ######################################################################
     # Filter stream by tweets containing the WORDS_TO_TRACK
-    print('Filtering tweets by: {}'.format(', '.join(config.WORDS_TO_TRACK)))
-    stream.statuses.filter(track=config.WORDS_TO_TRACK)
+    print('Filtering tweets by: {}'.format(', '.join(WORDS_TO_TRACK)))
+    stream.statuses.filter(track=WORDS_TO_TRACK)
