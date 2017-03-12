@@ -18,7 +18,7 @@ RUN apt-get install -y build-essential git
 RUN apt-get install -y python3 python3-dev python3-setuptools
 RUN apt-get install -y python3-pip
 
-# create a virtual environment and install all depsendecies from pypi
+# create a virtual environment and install all dependencies from pypi
 RUN pip3 install virtualenv
 RUN virtualenv -p /usr/bin/python3 /opt/venv
 ADD requirements.txt /opt/venv/requirements.txt
